@@ -190,7 +190,7 @@ var DEF={workers:[
 ],adminPin:"Msh@2026#",requirePhoto:false,companyName:"مشهور للبناء والهندسة"};
 
 // === STATE ===
-var C=null,cW=null,cR=null,sP=null,wA=0,aT="today",mW=null,cI=null;
+var C=null,cW=null,cR=null,sP=null,wA=0,aT="today",mW=null,cI=null,selYear=new Date().getFullYear(),selMonth=new Date().getMonth();
 
 // === DB HELPERS ===
 function lCfg(){return db.collection("config").doc("main").get().then(function(d){return d.exists?d.data():null}).catch(function(){return null})}
