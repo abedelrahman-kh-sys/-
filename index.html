@@ -167,7 +167,7 @@ window.addEventListener("offline",chkNet);
 chkNet();
 
 // === EMAILJS ===
-emailjs.init("ArCw8DEPPZy0omBmm");
+try{emailjs.init("ArCw8DEPPZy0omBmm")}catch(e){console.warn("EmailJS not loaded:",e)}
 
 // === AUTO MONTHLY REPORT ===
 function chkAutoSend(){
