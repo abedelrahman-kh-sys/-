@@ -663,7 +663,7 @@ function pRpt(wid){
       else if(!lv&&!isOff(day,w)){absent++}
       var st=lv?"<span style=\'color:#3498db\'>"+lv.type+"</span>":r&&r.checkIn?"<span style=\'color:#27c96e\'>حاضر</span>":"<span style=\'color:#999\'>—</span>";
       var lateTd=r&&r.checkIn?(late>5?"<span style=\'color:#e74c3c;font-weight:700\'>"+late+" د</span>":"<span style=\'color:#27c96e\'>✓</span>"):"—";
-      rows+=("<tr"+(isOff(day,w)?" style=\'background:#f9f9f9\'":"")+(lv?" style=\'background:#eef6ff\'":"")+">"+tdS+day+"</td>"+tdS+fd(day)+"</td>"+tdS+st+"</td>"+tdS+(r&&r.projectName?r.projectName:"—")+"</td>"+tdS+(r?ft(r.checkIn):"—")+"</td>"+tdS+(r&&r.checkInAddr?r.checkInAddr:"—")+"</td>"+tdS+(r?ft(r.checkOut):"—")+"</td>"+tdS+(r&&r.checkOutAddr?r.checkOutAddr:"—")+"</td>"+tdS+ch(r?r.checkIn:null,r?r.checkOut:null)+"</td>"+tdS+lateTd+"</td>"+tdS+(r&&r.flag?"<span style=\'color:#e67e22\'>"+r.flag+"</span>":(lv&&lv.note?lv.note:""))+"</td></tr>");
+      rows+=("<tr"+(isOff(day,w)?" style=\'background:#f9f9f9\'":"")+(lv?" style=\'background:#eef6ff\'":"")+">"+tdS+day+"</td>"+tdS+fd(day)+"</td>"+tdS+st+"</td>"+tdS+(r&&r.projectName?r.projectName:"—")+"</td>"+tdS+(r?ft(r.checkIn):"—")+"</td>"+tdS+(r&&r.checkInAddr?r.checkInAddr:"—")+"</td>"+tdS+(r?ft(r.checkOut):"—")+"</td>"+tdS+(r&&r.checkOutAddr?r.checkOutAddr:"—")+"</td>"+tdS+ch(r?r.checkIn:null,r?r.checkOut:null)+"</td>"+tdS+lateTd+"</"+tdS+(r&&r.checkIn&&r.checkOut?fmtOT(calcOvertime(r.checkIn,r.checkOut,w,r.shiftAtRecord,r.shiftEndAtRecord)):"")+"</"+tdS+(r&&r.flag?"<span style=\'color:#e67e22\'>"+r.flag+"</span>":(lv&&lv.note?lv.note:""))+"</td></tr>");
     });
 
     var workDays=onTime+lateDays+absent+leaveCount;
