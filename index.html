@@ -71,8 +71,9 @@ td{padding:10px;font-size:.8rem;border-bottom:1px solid rgba(30,54,84,.15)}
 @media(max-width:600px){.sgrid{grid-template-columns:repeat(2,1fr)}.pgrid{grid-template-columns:1fr}.comp-wrap{flex-direction:column!important}}
 ::-webkit-scrollbar{height:4px;width:4px}::-webkit-scrollbar-thumb{background:#1e3654;border-radius:4px}
 </style>
-<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoi2YXYtNmH2YjYsSAtINmG2LjYp9mFINin2YTYrdi22YjYsSIsInNob3J0X25hbWUiOiLYrdi22YjYsSDZhdi02YfZiNixIiwic3RhcnRfdXJsIjoiLi8iLCJkaXNwbGF5Ijoic3RhbmRhbG9uZSIsImJhY2tncm91bmRfY29sb3IiOiIjMGIxOTI5IiwidGhlbWVfY29sb3IiOiIjMGIxOTI5IiwiaWNvbnMiOlt7InNyYyI6Imljb24tMTkyLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifSx7InNyYyI6Imljb24tNTEyLnBuZyIsInNpemVzIjoiNTEyeDUxMiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIlx1MDY0NVx1MDYzNFx1MDY0N1x1MDY0OFx1MDYzMSAtIFx1MDY0Nlx1MDYzOFx1MDYyN1x1MDY0NSBcdTA2MjdcdTA2NDRcdTA2MmRcdTA2MzZcdTA2NDhcdTA2MzEiLCAic2hvcnRfbmFtZSI6ICJcdTA2MmRcdTA2MzZcdTA2NDhcdTA2MzEgXHUwNjQ1XHUwNjM0XHUwNjQ3XHUwNjQ4XHUwNjMxIiwgInN0YXJ0X3VybCI6ICIuIiwgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsICJiYWNrZ3JvdW5kX2NvbG9yIjogIiMwYjE5MjkiLCAidGhlbWVfY29sb3IiOiAiIzBiMTkyOSJ9">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="حضور مشهور">
 <meta name="theme-color" content="#0b1929">
@@ -408,10 +409,10 @@ function rComp(c){
     var cards="";
     results.forEach(function(item){
       var w=item.worker;var recs=item.recs;var leaves=item.leaves;
-      var totalWork=0,onTime=0,lateDays=0,totalLateMin=0,absent=0,leaveCount=0;
+      var totalWork=0,onTime=0,lateDays=0,totalLateMin=0,absent=0,leaveCount=0,totalOT2=0;
       var workDays=0;
       days.forEach(function(day){
-        if(day>today||isFriSat(day))return;
+        if(day>today||isOff(day,w))return;
         workDays++;
         var r=recs[day];var lv=leaves[day];
         if(lv){leaveCount++;return}
@@ -469,12 +470,12 @@ function rComp(c){
     setTimeout(function(){
       results.forEach(function(item){
         var w=item.worker;var recs=item.recs;var leaves=item.leaves;
-        var onTime=0,lateDays=0,absent=0,leaveCount=0;
+        var onTime=0,lateDays=0,absent=0,leaveCount=0,totalOT2=0;
         days.forEach(function(day){
           if(day>today||isOff(day,w))return;
           var r=recs[day];var lv=leaves[day];
           if(lv){leaveCount++;return}
-          if(r&&r.checkIn){var late=lateMin(r.checkIn,w.shiftStart||"07:00");if(late>5)lateDays++;else onTime++}else absent++
+          if(r&&r.checkIn){var late=lateMin(r.checkIn,w.shiftStart||"07:00");if(late>5)lateDays++;else onTime++;if(r.checkOut)totalOT2+=calcOvertime(r.checkIn,r.checkOut,w)}else absent++
         });
         drawPie("pie_"+w.id,onTime,lateDays,absent,leaveCount);
       });
