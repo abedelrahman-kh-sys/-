@@ -354,7 +354,7 @@ function addAdminBtn(){
   d.appendChild(b);
   c.appendChild(d);
 }
-function lWS(){var c=document.getElementById("w-ct");c.innerHTML="⏳ جارٍ التحميل...";document.getElementById("w-msg").innerHTML="";document.getElementById("w-err2").innerHTML="";gA(cW.id,td()).then(function(r){cR=r;setTimeout(addAdminBtn,200);if(!r){var ps=C.projects.filter(function(p){return p.active});var h="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";c.innerHTML=h;var pg=document.getElementById("w-ps");ps.forEach(function(p){var b=document.createElement("button");b.className="pbtn";b.textContent=p.name;b.onclick=function(){sP=p;pg.querySelectorAll(".pbtn").forEach(function(x){x.classList.remove("sel");x.textContent=x.textContent.replace("✅ ","")});b.classList.add("sel");b.textContent="✅ "+p.name;var btn=document.getElementById("w-cib");btn.disabled=false;btn.className="btn btn-ci";btn.textContent="✅ تسجيل وصول"};pg.appendChild(b)})}else if(r.checkIn&&!r.checkOut){var late=lateMin(r.checkIn,r.shiftAtRecord||cW.shiftStart||"07:00");var lateH=late>0?"<div style='margin:10px 0;padding:8px 14px;border-radius:10px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);font-size:.78rem;color:#e74c3c;font-weight:600'>⏰ تأخير: "+late+" دقيقة</div>":"";c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800;font-size:1.1rem'>تم تسجيل الوصول بنجاح</div><div style='color:#4e6d8a;font-size:.78rem;margin-top:6px'>الرجاء الدخول مرة أخرى لتسجيل المغادرة</div></div><div style='display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:12px;margin-bottom:12px;background:rgba(39,201,110,.08);border:1px solid rgba(39,201,110,.2)'><span style='color:#8ba3be;font-size:.85rem'>⏰ وصول</span><span style='color:#27c96e;font-size:1.15rem;font-weight:800;font-family:monospace'>"+ft(r.checkIn)+"</span></div><div style='text-align:center;padding:12px;border-radius:12px;margin-bottom:12px;background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.2)'><span style='font-size:.75rem;color:#4e6d8a'>📍 </span><span style='font-size:.88rem;color:#d4a853;font-weight:700'>"+es(r.projectName||"—")+"</span></div>"+lateH+"<button class='btn btn-co' onclick='doCO()'>🚪 تسجيل مغادرة</button>"}else{c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800'>تم تسجيل اليوم</div></div><div style='text-align:center;margin-bottom:16px'><span style='background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.25);border-radius:20px;padding:4px 14px;font-size:.78rem;color:#d4a853;font-weight:700'>📍 "+es(r.projectName||"—")+"</span></div><div class='s3'><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(39,201,110,.07);border:1px solid rgba(39,201,110,.2)'><div style='font-size:.68rem;color:#4e6d8a'>وصول</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#27c96e'>"+ft(r.checkIn)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.2)'><div style='font-size:.68rem;color:#4e6d8a'>مغادرة</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#e74c3c'>"+ft(r.checkOut)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(212,168,83,.07);border:1px solid rgba(212,168,83,.2)'><div style='font-size:.68rem;color:#4e6d8a'>ساعات</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#d4a853'>"+ch(r.checkIn,r.checkOut)+"</div></div></div>"}})}
+function lWS(){var c=document.getElementById("w-ct");c.innerHTML="⏳ جارٍ التحميل...";document.getElementById("w-msg").innerHTML="";document.getElementById("w-err2").innerHTML="";gA(cW.id,td()).then(function(r){cR=r;setTimeout(addAdminBtn,200);if(!r){var ps=C.projects.filter(function(p){return p.active});var h="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";c.innerHTML=h;var pg=document.getElementById("w-ps");ps.forEach(function(p){var b=document.createElement("button");b.className="pbtn";b.textContent=p.name;b.onclick=function(){sP=p;pg.querySelectorAll(".pbtn").forEach(function(x){x.classList.remove("sel");x.textContent=x.textContent.replace("✅ ","")});b.classList.add("sel");b.textContent="✅ "+p.name;var btn=document.getElementById("w-cib");btn.disabled=false;btn.className="btn btn-ci";btn.textContent="✅ تسجيل وصول"};pg.appendChild(b)})}else if(r.checkIn&&!r.checkOut){var late=lateMin(r.checkIn,r.shiftAtRecord||cW.shiftStart||"07:00");var lateH=late>0?"<div style='margin:10px 0;padding:8px 14px;border-radius:10px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);font-size:.78rem;color:#e74c3c;font-weight:600'>⏰ تأخير: "+late+" دقيقة</div>":"";c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800;font-size:1.1rem'>تم تسجيل الوصول بنجاح</div><div style='color:#4e6d8a;font-size:.78rem;margin-top:6px'>الرجاء الدخول مرة أخرى لتسجيل المغادرة</div></div><div style='display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:12px;margin-bottom:12px;background:rgba(39,201,110,.08);border:1px solid rgba(39,201,110,.2)'><span style='color:#8ba3be;font-size:.85rem'>⏰ وصول</span><span style='color:#27c96e;font-size:1.15rem;font-weight:800;font-family:monospace'>"+ft(r.checkIn)+"</span></div><div style='text-align:center;padding:12px;border-radius:12px;margin-bottom:12px;background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.2)'><span style='font-size:.75rem;color:#4e6d8a'>📍 </span><span style='font-size:.88rem;color:#d4a853;font-weight:700'>"+es(r.projectName||"—")+"</span></div>"+lateH+"<button class='btn btn-co' onclick='doCO()'>🚪 تسجيل مغادرة</button>"}else{c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800'>تم تسجيل اليوم</div></div>"+(r.shift2CheckIn&&!r.shift2CheckOut?"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:6px'>🔄 شفت إضافي جاري</div><div style='color:#27c96e;font-family:monospace;font-size:1.1rem'>وصول: "+ft(r.shift2CheckIn)+"</div></div><button class='btn' style='background:#9b59b6;color:#fff;margin-bottom:10px' onclick='doS2CO()'>🚪 إنهاء الشفت الإضافي</button>":(!r.shift2CheckIn?"<button class='btn' style='background:rgba(155,89,182,.2);border:1px solid rgba(155,89,182,.3);color:#9b59b6;margin-bottom:10px' onclick='doS2CI()'>🔄 بدء شفت إضافي</button>":"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:4px'>🔄 شفت إضافي مكتمل</div><div style='font-family:monospace;font-size:.85rem;color:#8ba3be'>"+ft(r.shift2CheckIn)+" → "+ft(r.shift2CheckOut)+" ("+ch(r.shift2CheckIn,r.shift2CheckOut)+")</div></div>"))+"<div style='text-align:center;margin-bottom:16px'><span style='background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.25);border-radius:20px;padding:4px 14px;font-size:.78rem;color:#d4a853;font-weight:700'>📍 "+es(r.projectName||"—")+"</span></div><div class='s3'><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(39,201,110,.07);border:1px solid rgba(39,201,110,.2)'><div style='font-size:.68rem;color:#4e6d8a'>وصول</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#27c96e'>"+ft(r.checkIn)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.2)'><div style='font-size:.68rem;color:#4e6d8a'>مغادرة</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#e74c3c'>"+ft(r.checkOut)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(212,168,83,.07);border:1px solid rgba(212,168,83,.2)'><div style='font-size:.68rem;color:#4e6d8a'>ساعات</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#d4a853'>"+ch(r.checkIn,r.checkOut)+"</div></div></div>"}})}
 function gLoc(){return new Promise(function(res,rej){if(!navigator.geolocation)return rej("GPS غير مدعوم");navigator.geolocation.getCurrentPosition(function(p){res({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)})},function(){rej("يرجى تفعيل GPS")},{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
 function revGeo(lat,lng){
   return fetch("https://nominatim.openstreetmap.org/reverse?lat="+lat+"&lon="+lng+"&format=json&accept-language=he,ar&zoom=18")
@@ -658,9 +658,10 @@ function pRpt(wid){
       if(r&&r.checkIn)tD++;
       if(r&&r.checkIn&&r.checkOut)tH+=(new Date(r.checkOut)-new Date(r.checkIn))/36e5;
       var late=r&&r.checkIn?lateMin(r.checkIn,r.shiftAtRecord||w.shiftStart||"07:00"):0;
-      if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
+      if(lv){/*leave - skip attendance calc*/}
+      else if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
+      else if(!isOff(day,w)){absent++}
       if(r&&r.checkIn&&r.checkOut)totalOT+=calcOvertime(r.checkIn,r.checkOut,w,r.shiftAtRecord,r.shiftEndAtRecord);
-      else if(!lv&&!isOff(day,w)){absent++}
       var st=lv?"<span style=\'color:#3498db\'>"+lv.type+"</span>":r&&r.checkIn?"<span style=\'color:#27c96e\'>حاضر</span>":"<span style=\'color:#999\'>—</span>";
       var lateTd=r&&r.checkIn?(late>5?"<span style=\'color:#e74c3c;font-weight:700\'>"+late+" د</span>":"<span style=\'color:#27c96e\'>✓</span>"):"—";
       rows+=("<tr"+(isOff(day,w)?" style=\'background:#f9f9f9\'":"")+(lv?" style=\'background:#eef6ff\'":"")+">"+tdS+day+"</td>"+tdS+fd(day)+"</td>"+tdS+st+"</td>"+tdS+(r&&r.projectName?r.projectName:"—")+"</td>"+tdS+(r?ft(r.checkIn):"—")+"</td>"+tdS+(r&&r.checkInAddr?r.checkInAddr:"—")+"</td>"+tdS+(r?ft(r.checkOut):"—")+"</td>"+tdS+(r&&r.checkOutAddr?r.checkOutAddr:"—")+"</td>"+tdS+ch(r?r.checkIn:null,r?r.checkOut:null)+"</td>"+tdS+lateTd+"</td>"+tdS+(r&&r.checkIn&&r.checkOut?fmtOT(calcOvertime(r.checkIn,r.checkOut,w,r.shiftAtRecord,r.shiftEndAtRecord)):"")+"</td>"+tdS+(r&&r.flag?"<span style=\'color:#e67e22\'>"+r.flag+"</span>":(lv&&lv.note?lv.note:""))+"</td></tr>");
@@ -865,6 +866,38 @@ function delAllData(wid,type){
   }).then(function(){cMdl();rACt()});
 }
 
+// === SHIFT 2 (EXTRA SHIFT) ===
+function doS2CI(){
+  var btn=event.target;btn.disabled=true;btn.textContent="⏳";
+  var photoP=C.requirePhoto?capturePhoto():Promise.resolve(null);
+  photoP.then(function(photo){
+    gLoc().then(function(loc){
+      revGeo(loc.lat,loc.lng).then(function(addr){
+        var now=new Date().toISOString();
+        var rec={};for(var k in cR)rec[k]=cR[k];
+        rec.shift2CheckIn=now;rec.shift2CheckInLoc=loc;rec.shift2CheckInAddr=addr;
+        rec.shift2CheckInPhoto=photo||null;rec.shift2CheckInDevice=getDeviceInfo();
+        sA(cW.id,td(),rec).then(function(){cR=rec;wMsg("تم تسجيل وصول الشفت الإضافي ✅");lWS()});
+      });
+    }).catch(function(e){wErr(typeof e==="string"?e:"خطأ GPS");btn.disabled=false;btn.textContent="🔄 بدء شفت إضافي"});
+  }).catch(function(e){wErr(typeof e==="string"?e:"خطأ الكاميرا");btn.disabled=false;btn.textContent="🔄 بدء شفت إضافي"});
+}
+function doS2CO(){
+  var btn=event.target;btn.disabled=true;btn.textContent="⏳";
+  var photoP=C.requirePhoto?capturePhoto():Promise.resolve(null);
+  photoP.then(function(photo){
+    gLoc().then(function(loc){
+      revGeo(loc.lat,loc.lng).then(function(addr){
+        var now=new Date().toISOString();
+        var rec={};for(var k in cR)rec[k]=cR[k];
+        rec.shift2CheckOut=now;rec.shift2CheckOutLoc=loc;rec.shift2CheckOutAddr=addr;
+        rec.shift2CheckOutPhoto=photo||null;rec.shift2CheckOutDevice=getDeviceInfo();
+        sA(cW.id,td(),rec).then(function(){cR=rec;wMsg("تم إنهاء الشفت الإضافي ✅");lWS()});
+      });
+    }).catch(function(e){wErr(typeof e==="string"?e:"خطأ GPS");btn.disabled=false;btn.textContent="🚪 إنهاء الشفت الإضافي"});
+  }).catch(function(e){wErr(typeof e==="string"?e:"خطأ الكاميرا");btn.disabled=false;btn.textContent="🚪 إنهاء الشفت الإضافي"});
+}
+
 // === SHOW PHOTO ===
 function showPhoto(wid,date,type){
   gA(wid,date).then(function(r){
@@ -963,8 +996,9 @@ function sendReport(wid){
       if(r&&r.checkIn)tD++;
       if(r&&r.checkIn&&r.checkOut)tH+=(new Date(r.checkOut)-new Date(r.checkIn))/36e5;
       var late=r&&r.checkIn?lateMin(r.checkIn,r.shiftAtRecord||w.shiftStart||"07:00"):0;
-      if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
-      else if(!lv&&!isOff(day,w)){absent++}
+      if(lv){/*leave - skip attendance calc*/}
+      else if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
+      else if(!isOff(day,w)){absent++}
       var status=lv?lv.type:r&&r.checkIn?"حاضر":(isOff(day,w)?"عطلة":"غائب");
       tableRows+="<tr><td style='padding:6px;border:1px solid #ddd'>"+day+"</td><td style='padding:6px;border:1px solid #ddd'>"+fd(day)+"</td><td style='padding:6px;border:1px solid #ddd'>"+status+"</td><td style='padding:6px;border:1px solid #ddd'>"+(r?ft(r.checkIn):"—")+"</td><td style='padding:6px;border:1px solid #ddd'>"+(r?ft(r.checkOut):"—")+"</td><td style='padding:6px;border:1px solid #ddd'>"+(r&&r.checkIn&&r.checkOut?ch(r.checkIn,r.checkOut):"—")+"</td><td style='padding:6px;border:1px solid #ddd'>"+(r&&r.checkIn?(late>5?late+" د":"✓"):"—")+"</td></tr>";
     });
@@ -1059,8 +1093,9 @@ function expExcel(wid){
       if(r&&r.checkIn)tD++;
       if(r&&r.checkIn&&r.checkOut)tH+=(new Date(r.checkOut)-new Date(r.checkIn))/36e5;
       var late=r&&r.checkIn?lateMin(r.checkIn,r.shiftAtRecord||w.shiftStart||"07:00"):0;
-      if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
-      else if(!lv&&!isOff(day,w)){absent++}
+      if(lv){/*leave - skip attendance calc*/}
+      else if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
+      else if(!isOff(day,w)){absent++}
       var status=lv?lv.type:r&&r.checkIn?(isOff(day,w)?"عمل إضافي":"حاضر"):(isOff(day,w)?"عطلة":"غائب");
       rows.push({
         "التاريخ":day,
