@@ -306,10 +306,12 @@ function calcOvertime(checkIn,checkOut,worker,recShiftStart,recShiftEnd){
   var d=ci.toISOString().split("T")[0];
   var shiftStart=new Date(d+"T"+ss+":00");
   var shiftEnd=new Date(d+"T"+se+":00");
-  var earlyMin=0,lateMin2=0;
+  var earlyMin=0,lateMin2=0,lateArrival=0;
   if(ci<shiftStart)earlyMin=Math.round((shiftStart-ci)/60000);
+  if(ci>shiftStart)lateArrival=Math.round((ci-shiftStart)/60000);
   if(co>shiftEnd)lateMin2=Math.round((co-shiftEnd)/60000);
-  return earlyMin+lateMin2;
+  var net=earlyMin+lateMin2-lateArrival;
+  return net>0?net:0;
 }
 function fmtOT(mins){if(mins<=0)return"";var h=Math.floor(mins/60);var m=mins%60;return(h>0?h+" س ":"")+(m>0?m+" د":"")}
 
