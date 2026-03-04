@@ -618,6 +618,37 @@ function svEditW(id){
   if(!p||p.length!==4||!/^\d{4}$/.test(p))return alert("PIN: 4 أرقام");
   var fri=document.getElementById("ew-fri").checked;
   var sat=document.getElementById("ew-sat").checked;
+  var oldW=C.workers.find(function(w){return w.id===id});
+  if(oldW&&(oldW.shiftStart!==ss||oldW.shiftEnd!==se)){
+    var today=td();
+    db.collection("shiftHistory").add({
+      workerId:id,
+      oldStart:oldW.shiftStart||"07:00",
+      oldEnd:oldW.shiftEnd||"16:30",
+      newStart:ss,
+      newEnd:se,
+      changedOn:today,
+      changedAt:new Date().toISOString()
+    });
+    db.collection("attendance").where("workerId","==",id).get().then(function(q){
+      q.forEach(function(d){
+        var rec=d.data();
+        var day=rec.date;
+        if(day>=today)return;
+        db.collection("schedules").doc(id+"_"+day).get().then(function(sdoc){
+          if(!sdoc.exists){
+            db.collection("schedules").doc(id+"_"+day).set({
+              workerId:id,date:day,
+              shiftStart:oldW.shiftStart||"07:00",
+              shiftEnd:oldW.shiftEnd||"16:30",
+              note:"تم حفظه تلقائياً عند تغيير الدوام الثابت",
+              setBy:"auto",setAt:new Date().toISOString()
+            });
+          }
+        });
+      });
+    });
+  }
   C.workers=C.workers.map(function(w){return w.id===id?Object.assign({},w,{pin:p,shiftStart:ss,shiftEnd:se,workFri:fri,workSat:sat}):w});
   sCfg().then(function(){cMdl();rACt()});
 }
