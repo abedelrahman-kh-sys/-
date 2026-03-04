@@ -419,7 +419,7 @@ function rComp(c){
   var aw=C.workers.filter(function(w){return w.active});
   var days=md();var today=td();
   var promises=aw.map(function(w){
-    return Promise.all([gAll(w.id),gAllLeaves(w.id)]).then(function(res){return{worker:w,recs:res[0],leaves:res[1]}})
+    return Promise.all([gAll(w.id),gAllLeaves(w.id),getMonthShifts(w.id)]).then(function(res){return{worker:w,recs:res[0],leaves:res[1],schedules:res[2]||{}}})
   });
   Promise.all(promises).then(function(results){
     var cards="";
