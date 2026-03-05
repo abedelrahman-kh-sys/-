@@ -6,6 +6,8 @@
 <title>نظام الحضور - مشهور للبناء</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Segoe UI',Tahoma,sans-serif;background:linear-gradient(160deg,#0b1929,#132744 50%,#0e1e35);color:#e8edf2;min-height:100vh;direction:rtl}
@@ -306,6 +308,8 @@ function calcOvertime(checkIn,checkOut,worker,recShiftStart,recShiftEnd){
   var d=ci.toISOString().split("T")[0];
   var shiftStart=new Date(d+"T"+ss+":00");
   var shiftEnd=new Date(d+"T"+se+":00");
+  if(co<ci)co=new Date(co.getTime()+864e5);
+  if(shiftEnd<=shiftStart)shiftEnd=new Date(shiftEnd.getTime()+864e5);
   var earlyMin=0,lateMin2=0,lateArrival=0;
   if(ci<shiftStart)earlyMin=Math.round((shiftStart-ci)/60000);
   if(ci>shiftStart)lateArrival=Math.round((ci-shiftStart)/60000);
@@ -356,7 +360,8 @@ function addAdminBtn(){
   d.appendChild(b);
   c.appendChild(d);
 }
-function lWS(){var c=document.getElementById("w-ct");c.innerHTML="⏳ جارٍ التحميل...";document.getElementById("w-msg").innerHTML="";document.getElementById("w-err2").innerHTML="";Promise.all([gA(cW.id,td()),getShift(cW.id,td())]).then(function(res){var r=res[0];cR=r;window._wsch=res[1];setTimeout(addAdminBtn,200);if(!r){var ps=C.projects.filter(function(p){return p.active});var h="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";c.innerHTML=h;var pg=document.getElementById("w-ps");ps.forEach(function(p){var b=document.createElement("button");b.className="pbtn";b.textContent=p.name;b.onclick=function(){sP=p;pg.querySelectorAll(".pbtn").forEach(function(x){x.classList.remove("sel");x.textContent=x.textContent.replace("✅ ","")});b.classList.add("sel");b.textContent="✅ "+p.name;var btn=document.getElementById("w-cib");btn.disabled=false;btn.className="btn btn-ci";btn.textContent="✅ تسجيل وصول"};pg.appendChild(b)})}else if(r.checkIn&&!r.checkOut){var wsch=window._wsch;var effStart=wsch?wsch.shiftStart:(r.shiftAtRecord||cW.shiftStart||"07:00");var late=lateMin(r.checkIn,effStart);var lateH=late>0?"<div style='margin:10px 0;padding:8px 14px;border-radius:10px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);font-size:.78rem;color:#e74c3c;font-weight:600'>⏰ تأخير: "+late+" دقيقة</div>":"";c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800;font-size:1.1rem'>تم تسجيل الوصول بنجاح</div><div style='color:#4e6d8a;font-size:.78rem;margin-top:6px'>الرجاء الدخول مرة أخرى لتسجيل المغادرة</div></div><div style='display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:12px;margin-bottom:12px;background:rgba(39,201,110,.08);border:1px solid rgba(39,201,110,.2)'><span style='color:#8ba3be;font-size:.85rem'>⏰ وصول</span><span style='color:#27c96e;font-size:1.15rem;font-weight:800;font-family:monospace'>"+ft(r.checkIn)+"</span></div><div style='text-align:center;padding:12px;border-radius:12px;margin-bottom:12px;background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.2)'><span style='font-size:.75rem;color:#4e6d8a'>📍 </span><span style='font-size:.88rem;color:#d4a853;font-weight:700'>"+es(r.projectName||"—")+"</span></div>"+lateH+"<button class='btn btn-co' onclick='doCO()'>🚪 تسجيل مغادرة</button>"}else{c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800'>تم تسجيل اليوم</div></div>"+(r.shift2CheckIn&&!r.shift2CheckOut?"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:6px'>🔄 شفت إضافي جاري</div><div style='color:#27c96e;font-family:monospace;font-size:1.1rem'>وصول: "+ft(r.shift2CheckIn)+"</div></div><button class='btn' style='background:#9b59b6;color:#fff;margin-bottom:10px' onclick='doS2CO()'>🚪 إنهاء الشفت الإضافي</button>":(!r.shift2CheckIn?"<button class='btn' style='background:rgba(155,89,182,.2);border:1px solid rgba(155,89,182,.3);color:#9b59b6;margin-bottom:10px' onclick='doS2CI()'>🔄 بدء شفت إضافي</button>":"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:4px'>🔄 شفت إضافي مكتمل</div><div style='font-family:monospace;font-size:.85rem;color:#8ba3be'>"+ft(r.shift2CheckIn)+" → "+ft(r.shift2CheckOut)+" ("+ch(r.shift2CheckIn,r.shift2CheckOut)+")</div>"+(r.shift2Note?"<div style=\'font-size:.75rem;color:#9b59b6;margin-top:4px\'>📝 "+es(r.shift2Note)+"</div>":"")+"</div>"))+"<div style='text-align:center;margin-bottom:16px'><span style='background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.25);border-radius:20px;padding:4px 14px;font-size:.78rem;color:#d4a853;font-weight:700'>📍 "+es(r.projectName||"—")+"</span></div><div class='s3'><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(39,201,110,.07);border:1px solid rgba(39,201,110,.2)'><div style='font-size:.68rem;color:#4e6d8a'>وصول</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#27c96e'>"+ft(r.checkIn)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.2)'><div style='font-size:.68rem;color:#4e6d8a'>مغادرة</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#e74c3c'>"+ft(r.checkOut)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(212,168,83,.07);border:1px solid rgba(212,168,83,.2)'><div style='font-size:.68rem;color:#4e6d8a'>ساعات</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#d4a853'>"+ch(r.checkIn,r.checkOut)+"</div></div></div>"}})}
+function lWS(){var c=document.getElementById("w-ct");c.innerHTML="⏳ جارٍ التحميل...";document.getElementById("w-msg").innerHTML="";document.getElementById("w-err2").innerHTML="";Promise.all([gA(cW.id,td()),getShift(cW.id,td())]).then(function(res){var r=res[0];cR=r;window._wsch=res[1];
+  if(!r){var yday=new Date();yday.setDate(yday.getDate()-1);var yd=yday.toISOString().split("T")[0];gA(cW.id,yd).then(function(yr){if(yr&&((yr.checkIn&&!yr.checkOut)||(yr.shift2CheckIn&&!yr.shift2CheckOut))){cR=yr;lWS()}});return}setTimeout(addAdminBtn,200);if(!r){var ps=C.projects.filter(function(p){return p.active});var h="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";c.innerHTML=h;var pg=document.getElementById("w-ps");ps.forEach(function(p){var b=document.createElement("button");b.className="pbtn";b.textContent=p.name;b.onclick=function(){sP=p;pg.querySelectorAll(".pbtn").forEach(function(x){x.classList.remove("sel");x.textContent=x.textContent.replace("✅ ","")});b.classList.add("sel");b.textContent="✅ "+p.name;var btn=document.getElementById("w-cib");btn.disabled=false;btn.className="btn btn-ci";btn.textContent="✅ تسجيل وصول"};pg.appendChild(b)})}else if(r.checkIn&&!r.checkOut){var wsch=window._wsch;var effStart=wsch?wsch.shiftStart:(r.shiftAtRecord||cW.shiftStart||"07:00");var late=lateMin(r.checkIn,effStart);var lateH=late>0?"<div style='margin:10px 0;padding:8px 14px;border-radius:10px;background:rgba(231,76,60,.08);border:1px solid rgba(231,76,60,.2);font-size:.78rem;color:#e74c3c;font-weight:600'>⏰ تأخير: "+late+" دقيقة</div>":"";c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800;font-size:1.1rem'>تم تسجيل الوصول بنجاح</div><div style='color:#4e6d8a;font-size:.78rem;margin-top:6px'>الرجاء الدخول مرة أخرى لتسجيل المغادرة</div></div><div style='display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:12px;margin-bottom:12px;background:rgba(39,201,110,.08);border:1px solid rgba(39,201,110,.2)'><span style='color:#8ba3be;font-size:.85rem'>⏰ وصول</span><span style='color:#27c96e;font-size:1.15rem;font-weight:800;font-family:monospace'>"+ft(r.checkIn)+"</span></div><div style='text-align:center;padding:12px;border-radius:12px;margin-bottom:12px;background:rgba(212,168,83,.08);border:1px solid rgba(212,168,83,.2)'><span style='font-size:.75rem;color:#4e6d8a'>📍 </span><span style='font-size:.88rem;color:#d4a853;font-weight:700'>"+es(r.projectName||"—")+"</span></div>"+lateH+"<button class='btn btn-co' onclick='doCO()'>🚪 تسجيل مغادرة</button>"}else{c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:2.8rem;margin-bottom:8px'>✅</div><div style='color:#27c96e;font-weight:800'>تم تسجيل اليوم</div></div>"+(r.shift2CheckIn&&!r.shift2CheckOut?"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:6px'>🔄 شفت إضافي جاري</div><div style='color:#27c96e;font-family:monospace;font-size:1.1rem'>وصول: "+ft(r.shift2CheckIn)+"</div></div><button class='btn' style='background:#9b59b6;color:#fff;margin-bottom:10px' onclick='doS2CO()'>🚪 إنهاء الشفت الإضافي</button>":(!r.shift2CheckIn?"<button class='btn' style='background:rgba(155,89,182,.2);border:1px solid rgba(155,89,182,.3);color:#9b59b6;margin-bottom:10px' onclick='doS2CI()'>🔄 بدء شفت إضافي</button>":"<div style='margin-bottom:12px;padding:10px;background:rgba(155,89,182,.1);border:1px solid rgba(155,89,182,.2);border-radius:10px;text-align:center'><div style='color:#9b59b6;font-weight:700;font-size:.85rem;margin-bottom:4px'>🔄 شفت إضافي مكتمل</div><div style='font-family:monospace;font-size:.85rem;color:#8ba3be'>"+ft(r.shift2CheckIn)+" → "+ft(r.shift2CheckOut)+" ("+ch(r.shift2CheckIn,r.shift2CheckOut)+")</div>"+(r.shift2Note?"<div style=\'font-size:.75rem;color:#9b59b6;margin-top:4px\'>📝 "+es(r.shift2Note)+"</div>":"")+"</div>"))+"<div style='text-align:center;margin-bottom:16px'><span style='background:rgba(212,168,83,.1);border:1px solid rgba(212,168,83,.25);border-radius:20px;padding:4px 14px;font-size:.78rem;color:#d4a853;font-weight:700'>📍 "+es(r.projectName||"—")+"</span></div><div class='s3'><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(39,201,110,.07);border:1px solid rgba(39,201,110,.2)'><div style='font-size:.68rem;color:#4e6d8a'>وصول</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#27c96e'>"+ft(r.checkIn)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(231,76,60,.07);border:1px solid rgba(231,76,60,.2)'><div style='font-size:.68rem;color:#4e6d8a'>مغادرة</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#e74c3c'>"+ft(r.checkOut)+"</div></div><div style='border-radius:10px;padding:12px;text-align:center;background:rgba(212,168,83,.07);border:1px solid rgba(212,168,83,.2)'><div style='font-size:.68rem;color:#4e6d8a'>ساعات</div><div style='font-size:.95rem;font-weight:800;font-family:monospace;color:#d4a853'>"+ch(r.checkIn,r.checkOut)+"</div></div></div>"}})}
 function gLoc(){return new Promise(function(res,rej){if(!navigator.geolocation)return rej("GPS غير مدعوم");navigator.geolocation.getCurrentPosition(function(p){res({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy)})},function(){rej("يرجى تفعيل GPS")},{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
 function revGeo(lat,lng){
   return fetch("https://nominatim.openstreetmap.org/reverse?lat="+lat+"&lon="+lng+"&format=json&accept-language=he,ar&zoom=18")
@@ -395,7 +400,18 @@ function doCO(){var btn=document.querySelector(".btn-co");if(btn){btn.disabled=t
         var now=new Date().toISOString();
         var rec={};for(var k in cR)rec[k]=cR[k];
         rec.checkOut=now;rec.checkOutLoc=loc;rec.checkOutAddr=addr;rec.checkOutPhoto=photo||null;rec.checkOutDevice=getDeviceInfo();
-        sA(cW.id,td(),rec).then(function(){cR=rec;wMsg("تم تسجيل المغادرة ✅");lWS()});
+        sA(cW.id,rec.date||td(),rec).then(function(){
+          cR=rec;
+          var ciDate=rec.date||td();
+          var coDate=td();
+          if(ciDate!==coDate){
+            rec.flag=(rec.flag?rec.flag+" | ":"")+"عمل متواصل حتى "+ft(rec.checkOut)+" ("+coDate+")";
+            sA(cW.id,ciDate,rec);
+            var totalH=((new Date(rec.checkOut)-new Date(rec.checkIn))/36e5).toFixed(1);
+            var refRec={workerId:rec.workerId,workerName:rec.workerName,date:coDate,projectId:rec.projectId,projectName:rec.projectName,checkIn:null,checkOut:null,flag:"⬅️ استمرار عمل من "+ciDate+" | وصول: "+ft(rec.checkIn)+" مغادرة: "+ft(rec.checkOut)+" | إجمالي: "+totalH+" ساعة",isOvernight:true,refDate:ciDate};
+            sA(cW.id,coDate,refRec);
+          }
+          wMsg("تم تسجيل المغادرة ✅");lWS()});
       });
     }).catch(function(e){wErr(typeof e==="string"?e:"خطأ GPS");if(btn){btn.disabled=false;btn.textContent="🚪 تسجيل مغادرة"}});
   }
@@ -598,9 +614,46 @@ function rMng(c){
 }
 
 // ARCHIVE
-function rArch(c){gFlag().then(function(f){if(!f.length){c.innerHTML="<div class='tw'><div class='th2'><h3 style='color:#d4a853;font-size:.9rem;font-weight:700;margin:0'>🗄️ أرشيف</h3></div><div style='padding:30px;text-align:center;color:#4e6d8a'>لا توجد سجلات</div></div>";return}var rows=f.map(function(r){return"<tr><td class='mono' style='font-size:.75rem'>"+r.date+"</td><td style='font-weight:700'>"+es(r.workerName)+"</td><td style='font-size:.75rem;color:#d4a853'>"+es(r.projectName||"—")+"</td><td class='mono'>"+ft(r.checkIn)+"</td><td class='mono'>"+ft(r.checkOut)+"</td><td style='color:#d4a853;font-weight:700'>"+ch(r.checkIn,r.checkOut)+"</td><td style='color:#f0a030'>🏷️ "+es(r.flag)+"</td><td><button class='bs' style='background:rgba(231,76,60,.12);color:#e74c3c' onclick=\"dRec('"+r.workerId+"','"+r.date+"')\">🗑️</button></td></tr>"}).join("");c.innerHTML="<div class='tw'><div class='th2'><h3 style='color:#d4a853;font-size:.9rem;font-weight:700;margin:0'>🗄️ أرشيف</h3></div><div style='overflow-x:auto'><table><thead><tr>"+["التاريخ","العامل","المشروع","وصول","مغادرة","ساعات","ملاحظة","حذف"].map(function(h){return"<th>"+h+"</th>"}).join("")+"</tr></thead><tbody>"+rows+"</tbody></table></div></div>"})}
+function rArch(c){
+  var aw=C.workers.filter(function(w){return w.active});
+  var wOpts=aw.map(function(w){return"<option value='"+w.id+"'>"+w.name+"</option>"}).join("");
+  c.innerHTML="<div class='tw'><div class='th2'><h3 style='color:#d4a853;font-size:.9rem;font-weight:700;margin:0'>🗄️ سجل النشاط</h3></div><div style='padding:10px;display:flex;gap:8px;flex-wrap:wrap'><select class='mi' id='arch-w' style='flex:1;min-width:150px' onchange='loadArchive()'><option value=''>كل العمال</option>"+wOpts+"</select><input type='date' class='mi' id='arch-from' style='flex:1' onchange='loadArchive()'><input type='date' class='mi' id='arch-to' style='flex:1' onchange='loadArchive()'></div><div id='arch-list' style='padding:10px'><div style='text-align:center;color:#4e6d8a;padding:20px'>اختر الفلتر وسيظهر السجل</div></div></div>";
+  document.getElementById("arch-from").value=td();
+  document.getElementById("arch-to").value=td();
+  loadArchive();
+}
+function loadArchive(){
+  var wid=document.getElementById("arch-w").value;
+  var from=document.getElementById("arch-from").value;
+  var to=document.getElementById("arch-to").value;
+  var list=document.getElementById("arch-list");
+  list.innerHTML="<div style='text-align:center;padding:20px;color:#d4a853'>⏳ جارٍ التحميل...</div>";
+  var q=db.collection("activityLog").orderBy("timestamp","desc").limit(200);
+  if(wid)q=q.where("workerId","==",wid);
+  q.get().then(function(snap){
+    var logs=[];
+    snap.forEach(function(d){
+      var l=d.data();
+      if(from&&l.date<from)return;
+      if(to&&l.date>to)return;
+      logs.push(l);
+    });
+    if(!logs.length){list.innerHTML="<div style='text-align:center;padding:20px;color:#4e6d8a'>لا توجد سجلات</div>";return}
+    var rows=logs.map(function(l){
+      var actionName=l.action==="checkIn"?"⬅️ وصول":l.action==="checkOut"?"➡️ مغادرة":l.action==="shift2CheckIn"?"🔄 شفت2 وصول":l.action==="shift2CheckOut"?"🔄 شفت2 مغادرة":"📝 "+l.action;
+      var time=l.timestamp?new Date(l.timestamp).toLocaleTimeString("ar",{hour:"2-digit",minute:"2-digit"}):"—";
+      var photoBtn=l.photo?"<button class='bs' style='background:rgba(52,152,219,.12);color:#3498db;font-size:.65rem' onclick=\"showArchPhoto('"+l.photo+"')\">📷</button>":"";
+      var mapBtn=l.location?"<button class='bs' style='background:rgba(39,201,110,.12);color:#27c96e;font-size:.65rem' onclick=\"window.open(\'https://maps.google.com/?q="+l.location.lat+","+l.location.lng+"\')\" >📍</button>":"";
+      return"<div style='padding:10px;margin-bottom:6px;background:rgba(139,163,190,.05);border:1px solid rgba(139,163,190,.1);border-radius:8px'><div style='display:flex;justify-content:space-between;align-items:center;margin-bottom:4px'><span style='font-weight:700;color:#e0c97b;font-size:.82rem'>"+es(l.workerName||"—")+"</span><span style='font-size:.7rem;color:#4e6d8a'>"+l.date+" "+time+"</span></div><div style='display:flex;align-items:center;gap:8px;flex-wrap:wrap'><span class='badge' style='background:rgba(212,168,83,.12);color:#d4a853;font-size:.7rem'>"+actionName+"</span>"+(l.projectName?"<span style='font-size:.7rem;color:#8ba3be'>"+es(l.projectName)+"</span>":"")+(l.address?"<span style='font-size:.65rem;color:#4e6d8a'>"+es(l.address)+"</span>":"")+(l.device?"<span style='font-size:.6rem;color:#3a546e'>"+es(l.device)+"</span>":"")+(l.note?"<span style='font-size:.7rem;color:#9b59b6'>📝 "+es(l.note)+"</span>":"")+"</div><div style='margin-top:4px;display:flex;gap:4px'>"+photoBtn+mapBtn+"</div></div>"
+    }).join("");
+    list.innerHTML=rows;
+  }).catch(function(e){list.innerHTML="<div style='text-align:center;color:#e74c3c'>خطأ: "+e.message+"</div>"});
+}
+function showArchPhoto(url){
+  document.getElementById("mdl-c").innerHTML="<div style='text-align:center'><img src='"+url+"' style='max-width:100%;max-height:70vh;border-radius:10px'><br><button class='btn' style='margin-top:10px;background:rgba(231,76,60,.15);color:#e74c3c' onclick='cMdl()'>✕ إغلاق</button></div>";
+  document.getElementById("mdl").style.display="flex";
+}
 
-// === ACTIONS ===
 function addW(){var n=document.getElementById("nwn").value.trim(),p=document.getElementById("nwp").value.trim(),ss=document.getElementById("nws").value.trim(),se=document.getElementById("nwe").value.trim();if(!n||!p||p.length!==4||!/^\d{4}$/.test(p))return alert("أدخل اسم و PIN (4 أرقام)");C.workers.push({id:gi(),name:n,pin:p,active:true,shiftStart:ss||"07:00",shiftEnd:se||"16:30",workFri:true,workSat:false});sCfg().then(function(){rACt()})}
 function tW(id){C.workers=C.workers.map(function(w){return w.id===id?Object.assign({},w,{active:!w.active}):w});sCfg().then(function(){rASum();rACt()})}
 function addP(){var n=document.getElementById("npn").value.trim();if(!n)return;C.projects.push({id:gi(),name:n,active:true});sCfg().then(function(){rACt()})}
@@ -690,14 +743,14 @@ function pRpt(wid){
       }
       if(r&&r.checkIn)tD++;
       if(r&&r.checkIn&&r.checkOut)tH+=(new Date(r.checkOut)-new Date(r.checkIn))/36e5;
-      var tsch=window._tsch&&window._tsch[w.id];var effStart=tsch?tsch.shiftStart:(r&&r.shiftAtRecord?r.shiftAtRecord:w.shiftStart||"07:00");var late=r&&r.checkIn?lateMin(r.checkIn,effStart):0;
+      var dayShift=schedules[day];var effStart=dayShift?dayShift.shiftStart:(r&&r.shiftAtRecord?r.shiftAtRecord:w.shiftStart||"07:00");var late=r&&r.checkIn?lateMin(r.checkIn,effStart):0;
       if(lv){/*leave - skip attendance calc*/}
       else if(r&&r.checkIn){if(late>5){lateDays++;tLate+=late}else{onTime++}}
       else if(!isOff(day,w)){absent++}
-      if(r&&r.checkIn&&r.checkOut)totalOT+=calcOvertime(r.checkIn,r.checkOut,w,r.shiftAtRecord,r.shiftEndAtRecord);
+      if(r&&r.checkIn&&r.checkOut)totalOT+=calcOvertime(r.checkIn,r.checkOut,w,effStart,dayShift?dayShift.shiftEnd:(r&&r.shiftEndAtRecord?r.shiftEndAtRecord:w.shiftEnd||"16:30"));
       var st=lv?"<span style=\'color:#3498db\'>"+lv.type+"</span>":r&&r.checkIn?"<span style=\'color:#27c96e\'>حاضر</span>":"<span style=\'color:#999\'>—</span>";
       var lateTd=r&&r.checkIn?(late>5?"<span style=\'color:#e74c3c;font-weight:700\'>"+late+" د</span>":"<span style=\'color:#27c96e\'>✓</span>"):"—";
-      rows+=("<tr"+(isOff(day,w)?" style=\'background:#f9f9f9\'":"")+(lv?" style=\'background:#eef6ff\'":"")+">"+tdS+day+"</td>"+tdS+fd(day)+"</td>"+tdS+st+"</td>"+tdS+(r&&r.projectName?r.projectName:"—")+"</td>"+tdS+(r?ft(r.checkIn):"—")+"</td>"+tdS+(r&&r.checkInAddr?r.checkInAddr:"—")+"</td>"+tdS+(r?ft(r.checkOut):"—")+"</td>"+tdS+(r&&r.checkOutAddr?r.checkOutAddr:"—")+"</td>"+tdS+ch(r?r.checkIn:null,r?r.checkOut:null)+"</td>"+tdS+lateTd+"</td>"+tdS+(r&&r.checkIn&&r.checkOut?fmtOT(calcOvertime(r.checkIn,r.checkOut,w,r.shiftAtRecord,r.shiftEndAtRecord)):"")+"</td>"+tdS+(r&&r.flag?"<span style=\'color:#e67e22\'>"+r.flag+"</span>":(lv&&lv.note?lv.note:""))+"</td></tr>");
+      rows+=("<tr"+(isOff(day,w)?" style=\'background:#f9f9f9\'":"")+(lv?" style=\'background:#eef6ff\'":"")+">"+tdS+day+"</td>"+tdS+fd(day)+"</td>"+tdS+st+"</td>"+tdS+(r&&r.projectName?r.projectName:"—")+"</td>"+tdS+(r?ft(r.checkIn):"—")+"</td>"+tdS+(r&&r.checkInAddr?r.checkInAddr:"—")+"</td>"+tdS+(r?ft(r.checkOut):"—")+"</td>"+tdS+(r&&r.checkOutAddr?r.checkOutAddr:"—")+"</td>"+tdS+ch(r?r.checkIn:null,r?r.checkOut:null)+"</td>"+tdS+lateTd+"</td>"+tdS+(r&&r.checkIn&&r.checkOut?fmtOT(calcOvertime(r.checkIn,r.checkOut,w,effStart,dayShift?dayShift.shiftEnd:(r&&r.shiftEndAtRecord?r.shiftEndAtRecord:w.shiftEnd||"16:30"))):"")+"</td>"+tdS+(r&&r.flag?"<span style=\'color:#e67e22\'>"+r.flag+"</span>":(lv&&lv.note?lv.note:""))+"</td></tr>");
     });
 
     var workDays=onTime+lateDays+absent+leaveCount;
@@ -959,7 +1012,7 @@ function doS2CIConfirm(){
         var rec={};for(var k in cR)rec[k]=cR[k];
         rec.shift2CheckIn=now;rec.shift2CheckInLoc=loc;rec.shift2CheckInAddr=addr;rec.shift2Note=note;
         rec.shift2CheckInPhoto=photo||null;rec.shift2CheckInDevice=getDeviceInfo();
-        sA(cW.id,td(),rec).then(function(){cR=rec;wMsg("تم تسجيل وصول الشفت الإضافي ✅");lWS()});
+        sA(cW.id,rec.date||td(),rec).then(function(){cR=rec;logAction(cW.id,"shift2CheckIn",rec);wMsg("تم تسجيل وصول الشفت الإضافي ✅");lWS()});
       });
     }).catch(function(e){wErr(typeof e==="string"?e:"خطأ GPS");lWS()});
   }).catch(function(e){wErr(typeof e==="string"?e:"خطأ الكاميرا");lWS()});
@@ -974,10 +1027,41 @@ function doS2CO(){
         var rec={};for(var k in cR)rec[k]=cR[k];
         rec.shift2CheckOut=now;rec.shift2CheckOutLoc=loc;rec.shift2CheckOutAddr=addr;
         rec.shift2CheckOutPhoto=photo||null;rec.shift2CheckOutDevice=getDeviceInfo();
-        sA(cW.id,td(),rec).then(function(){cR=rec;wMsg("تم إنهاء الشفت الإضافي ✅");lWS()});
+        sA(cW.id,rec.date||td(),rec).then(function(){
+          cR=rec;
+          var s2ciDate=rec.date||td();
+          var s2coDate=td();
+          if(s2ciDate!==s2coDate&&rec.shift2CheckIn){
+            rec.flag=(rec.flag?rec.flag+" | ":"")+"شفت إضافي حتى "+ft(rec.shift2CheckOut)+" ("+s2coDate+")";
+            sA(cW.id,s2ciDate,rec);
+            var s2Ref={workerId:rec.workerId,workerName:rec.workerName,date:s2coDate,projectId:rec.projectId,projectName:rec.projectName,checkIn:null,checkOut:null,flag:"⬅️ استمرار شفت إضافي من "+s2ciDate+" | "+ft(rec.shift2CheckIn)+"→"+ft(rec.shift2CheckOut),isOvernight:true,refDate:s2ciDate};
+            gA(cW.id,s2coDate).then(function(existing){if(!existing)sA(cW.id,s2coDate,s2Ref)});
+          }
+          logAction(cW.id,"shift2CheckOut",rec);wMsg("تم إنهاء الشفت الإضافي ✅");lWS()});
       });
     }).catch(function(e){wErr(typeof e==="string"?e:"خطأ GPS");btn.disabled=false;btn.textContent="🚪 إنهاء الشفت الإضافي"});
   }).catch(function(e){wErr(typeof e==="string"?e:"خطأ الكاميرا");btn.disabled=false;btn.textContent="🚪 إنهاء الشفت الإضافي"});
+}
+
+// === ACTIVITY LOG ===
+function logAction(wid,action,data){
+  return db.collection("activityLog").add({
+    workerId:wid,
+    workerName:data.workerName||"",
+    action:action,
+    date:data.date||td(),
+    timestamp:new Date().toISOString(),
+    checkIn:data.checkIn||null,
+    checkOut:data.checkOut||null,
+    shift2CheckIn:data.shift2CheckIn||null,
+    shift2CheckOut:data.shift2CheckOut||null,
+    projectName:data.projectName||"",
+    location:data.loc||null,
+    address:data.addr||"",
+    device:data.device||"",
+    photo:data.photo||null,
+    note:data.note||""
+  }).catch(function(e){console.warn("Log error:",e)});
 }
 
 // === SHOW PHOTO ===
