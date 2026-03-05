@@ -727,8 +727,8 @@ function sAllWA(){var aw=C.workers.filter(function(w){return w.active});var m="�
 // PRINT
 function pRpt(wid){
   var w=C.workers.find(function(x){return x.id===wid});if(!w)return;
-  Promise.all([gAll(wid),gAllLeaves(wid)]).then(function(res){
-    var recs=res[0];var leaves=res[1];
+  Promise.all([gAll(wid),gAllLeaves(wid),getMonthShifts(wid)]).then(function(res){
+    var recs=res[0];var leaves=res[1];var schedules=res[2]||{};
     var days=md();var today=td();
     var tD=0,tH=0,tLate=0,onTime=0,lateDays=0,absent=0,leaveCount=0,totalOT=0;
     var leaveCounts={};
@@ -875,8 +875,8 @@ function oDataMgmt(wid){
   var w=C.workers.find(function(x){return x.id===wid});if(!w)return;
   document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>🗑️ إدارة بيانات - "+es(w.name)+"</h3><div id='dm-ct' style='text-align:center;color:#4e6d8a'>⏳ جارٍ التحميل...</div>";
   document.getElementById("mdl").style.display="flex";
-  Promise.all([gAll(wid),gAllLeaves(wid)]).then(function(res){
-    var recs=res[0];var leaves=res[1];
+  Promise.all([gAll(wid),gAllLeaves(wid),getMonthShifts(wid)]).then(function(res){
+    var recs=res[0];var leaves=res[1];var schedules=res[2]||{};
     var attDates=Object.keys(recs).sort().reverse();
     var lvDates=Object.keys(leaves).sort().reverse();
     var h="<div style='margin-bottom:14px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center'>";
@@ -1150,8 +1150,8 @@ function capturePhoto(){
 function sendReport(wid){
   var w=C.workers.find(function(x){return x.id===wid});if(!w)return;
   var btn=event.target;btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
-  Promise.all([gAll(wid),gAllLeaves(wid)]).then(function(res){
-    var recs=res[0];var leaves=res[1];
+  Promise.all([gAll(wid),gAllLeaves(wid),getMonthShifts(wid)]).then(function(res){
+    var recs=res[0];var leaves=res[1];var schedules=res[2]||{};
     var days=md();var today=td();
     var tD=0,tH=0,tLate=0,onTime=0,lateDays=0,absent=0,leaveCount=0;
     var tableRows="";
@@ -1247,8 +1247,8 @@ function sendAllReports(){
 // === EXCEL EXPORT ===
 function expExcel(wid){
   var w=C.workers.find(function(x){return x.id===wid});if(!w)return;
-  Promise.all([gAll(wid),gAllLeaves(wid)]).then(function(res){
-    var recs=res[0];var leaves=res[1];
+  Promise.all([gAll(wid),gAllLeaves(wid),getMonthShifts(wid)]).then(function(res){
+    var recs=res[0];var leaves=res[1];var schedules=res[2]||{};
     var days=md();var today=td();
     var rows=[];
     var tD=0,tH=0,tLate=0,onTime=0,lateDays=0,absent=0,leaveCount=0;
