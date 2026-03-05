@@ -958,10 +958,7 @@ function delAllData(wid,type){
 // === NO RECORD FALLBACK ===
 function lWSNoRec(){
   var c=document.getElementById("w-ct");if(!c)return;
-  var ps=C.projects.filter(function(p){return p.active});
-  c.innerHTML="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";
-  var pg=document.getElementById("w-ps");if(!pg)return;
-  ps.forEach(function(p){var d=document.createElement("div");d.className="pcard";d.textContent="📍 "+p.name;d.onclick=function(){sP=p;document.querySelectorAll(".pcard").forEach(function(x){x.classList.remove("sel")});d.classList.add("sel");var b=document.getElementById("w-cib");if(b){b.disabled=false;b.className="btn btn-g";b.textContent="⬆️ تسجيل وصول - "+p.name}};pg.appendChild(d)});
+  var ps=C.projects.filter(function(p){return p.active});var h="<div style='text-align:center;margin-bottom:16px'><div style='font-size:3rem;margin-bottom:8px'>👋</div><div style='font-size:.85rem;color:#4e6d8a;font-weight:600'>اختر المشروع وسجّل وصولك</div></div><div class='pgrid' id='w-ps'></div><button class='btn btn-off' id='w-cib' onclick='doCI()' disabled>⬆️ اختر المشروع أولاً</button>";c.innerHTML=h;var pg=document.getElementById("w-ps");ps.forEach(function(p){var b=document.createElement("button");b.className="pbtn";b.textContent=p.name;b.onclick=function(){sP=p;pg.querySelectorAll(".pbtn").forEach(function(x){x.classList.remove("sel");x.textContent=x.textContent.replace("✅ ","")});b.classList.add("sel");b.textContent="✅ "+p.name;var btn=document.getElementById("w-cib");btn.disabled=false;btn.className="btn btn-ci";btn.textContent="✅ تسجيل وصول"};pg.appendChild(b)});
   setTimeout(addAdminBtn,200);
 }
 
