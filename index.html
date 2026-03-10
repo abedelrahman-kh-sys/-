@@ -1480,8 +1480,11 @@ function oEditTime(wid,date){
     if(!r)return alert("لا يوجد سجل");
     var ciTime=r.checkIn?new Date(r.checkIn).toTimeString().substring(0,5):"";
     var coTime=r.checkOut?new Date(r.checkOut).toTimeString().substring(0,5):"";
+    var s2ciTime=r.shift2CheckIn?new Date(r.shift2CheckIn).toTimeString().substring(0,5):"";
+    var s2coTime=r.shift2CheckOut?new Date(r.shift2CheckOut).toTimeString().substring(0,5):"";
     var wk=C.workers.find(function(x){return x.id===wid});
-    document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>✏️ تعديل أوقات - "+es(wk?wk.name:wid)+"</h3><p style='color:#4e6d8a;font-size:.78rem;margin-bottom:14px'>📅 "+date+"</p><div style='display:flex;gap:10px;margin-bottom:14px'><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>⏰ وقت الوصول</label><input type='time' class='mi' id='et-ci' value='"+ciTime+"' style='direction:ltr;font-size:1.1rem;font-weight:700;text-align:center'></div><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>🚪 وقت المغادرة</label><input type='time' class='mi' id='et-co' value='"+coTime+"' style='direction:ltr;font-size:1.1rem;font-weight:700;text-align:center'></div></div><div style='margin-bottom:14px'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>📍 المشروع</label><input class='mi' id='et-proj' value='"+es(r.projectName||"")+"'></div><button style='width:100%;padding:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);border:none;border-radius:10px;color:#0b1929;font-weight:700;cursor:pointer;font-size:1rem' onclick=\"svEditTime('"+wid+"','"+date+"')\">💾 حفظ التعديل</button>";
+    var s2Section=r.shift2CheckIn?"<div style='margin:14px 0;padding:12px;background:rgba(155,89,182,.06);border:1px solid rgba(155,89,182,.2);border-radius:10px'><div style='color:#9b59b6;font-size:.78rem;font-weight:700;margin-bottom:8px'>🔄 الشفت الإضافي</div><div style='display:flex;gap:10px;margin-bottom:10px'><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>وصول شفت 2</label><input type='time' class='mi' id='et-s2ci' value='"+s2ciTime+"' style='direction:ltr;font-size:1rem;font-weight:700;text-align:center'></div><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>مغادرة شفت 2</label><input type='time' class='mi' id='et-s2co' value='"+s2coTime+"' style='direction:ltr;font-size:1rem;font-weight:700;text-align:center'></div></div><p style='font-size:.65rem;color:#4e6d8a;margin:0'>💡 أفرغ الحقلين لحذف الشفت الإضافي</p></div>":"";
+    document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>✏️ تعديل أوقات - "+es(wk?wk.name:wid)+"</h3><p style='color:#4e6d8a;font-size:.78rem;margin-bottom:14px'>📅 "+date+"</p><div style='display:flex;gap:10px;margin-bottom:14px'><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>⏰ وقت الوصول</label><input type='time' class='mi' id='et-ci' value='"+ciTime+"' style='direction:ltr;font-size:1.1rem;font-weight:700;text-align:center'></div><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>🚪 وقت المغادرة</label><input type='time' class='mi' id='et-co' value='"+coTime+"' style='direction:ltr;font-size:1.1rem;font-weight:700;text-align:center'></div></div><div style='margin-bottom:14px'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>📍 المشروع</label><input class='mi' id='et-proj' value='"+es(r.projectName||"")+"'></div>"+s2Section+"<button style='width:100%;padding:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);border:none;border-radius:10px;color:#0b1929;font-weight:700;cursor:pointer;font-size:1rem' onclick=\"svEditTime('"+wid+"','"+date+"')\">💾 حفظ التعديل</button>";
     document.getElementById("mdl").style.display="flex";
   });
 }
@@ -1489,6 +1492,10 @@ function svEditTime(wid,date){
   var ciT=document.getElementById("et-ci").value;
   var coT=document.getElementById("et-co").value;
   var proj=document.getElementById("et-proj").value.trim();
+  var s2ciEl=document.getElementById("et-s2ci");
+  var s2coEl=document.getElementById("et-s2co");
+  var s2ciT=s2ciEl?s2ciEl.value:"";
+  var s2coT=s2coEl?s2coEl.value:"";
   gA(wid,date).then(function(r){
     if(!r)return;
     if(ciT){
@@ -1502,6 +1509,21 @@ function svEditTime(wid,date){
       r.checkOut=null;
     }
     if(proj)r.projectName=proj;
+    // Handle shift2 edit/delete
+    if(s2ciEl){
+      if(s2ciT){
+        r.shift2CheckIn=new Date(date+"T"+s2ciT+":00").toISOString();
+      }else{
+        r.shift2CheckIn=null;r.shift2CheckInLoc=null;r.shift2CheckInAddr=null;
+        r.shift2CheckInPhoto=null;r.shift2CheckInDevice=null;r.shift2Note=null;
+      }
+      if(s2coT){
+        r.shift2CheckOut=new Date(date+"T"+s2coT+":00").toISOString();
+      }else{
+        r.shift2CheckOut=null;r.shift2CheckOutLoc=null;r.shift2CheckOutAddr=null;
+        r.shift2CheckOutPhoto=null;r.shift2CheckOutDevice=null;
+      }
+    }
     return sA(wid,date,r);
   }).then(function(){cMdl();rACt()});
 }
