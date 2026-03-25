@@ -1650,7 +1650,7 @@ lCfg().then(function(cfg){
   if(needSave)sCfg();
   var hash=window.location.hash.replace("#","");
   if(hash==="view"){sessionStorage.setItem("ma","1");isViewer=true;go("admin");return}
-  if(hash){var w=C.workers.find(function(x){return x.id===hash&&x.active});if(w){sessionStorage.setItem("ma","1");cW=w;wA=0;go("wpin");return}}
+  if(hash){var w=C.workers.find(function(x){return x.id===hash&&x.active});if(w){if(w.id==="ahussein"){sessionStorage.setItem("ma","1");cW=w;isViewer=true;go("admin");return}sessionStorage.setItem("ma","1");cW=w;wA=0;go("wpin");return}}
   if(sessionStorage.getItem("ma")==="1")go("home");
 });
 </script>
