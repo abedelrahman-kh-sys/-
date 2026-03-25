@@ -1609,10 +1609,13 @@ var adminPhone=document.getElementById("wa-admin").value.trim();
 if(!adminPhone){alert("⚠️ أدخل رقم هاتف المدير أولاً");return}
 var token=document.getElementById("wa-token").value.trim();
 var phoneId=document.getElementById("wa-phoneid").value.trim();
-if(!token||!phoneId){alert("⚠️ أدخل Access Token و Phone Number ID أولاً");return}
+if(!token||!phoneId){alert("⚠️ أدخل Access Token و Phone Number ID واحفظ الإعدادات أولاً");return}
 toast("📤 جارٍ الإرسال...");
-var testFn=firebase.functions().httpsCallable("testWhatsApp");
-testFn({phone:adminPhone,message:"🔔 رسالة تجريبية\nنظام تذكيرات الحضور يعمل بنجاح ✅\n\nمشهور للبناء والهندسة"}).then(function(r){if(r.data&&r.data.success){toast("✅ تم إرسال الرسالة التجريبية بنجاح!")}else{alert("❌ فشل الإرسال:\n"+JSON.stringify(r.data))}}).catch(function(e){alert("❌ خطأ: "+e.message)});
+var testRef=db.collection("reminderTests").doc();
+testRef.set({phone:adminPhone,message:"🔔 رسالة تجريبية\nنظام تذكيرات الحضور يعمل بنجاح ✅\n\nمشهور للبناء والهندسة",status:"pending",createdAt:new Date().toISOString()}).then(function(){
+var unsub=testRef.onSnapshot(function(doc){var d=doc.data();if(!d||d.status==="pending")return;unsub();if(d.status==="sent"){toast("✅ تم إرسال الرسالة التجريبية بنجاح!")}else{alert("❌ فشل الإرسال:\n"+(d.error||JSON.stringify(d.result)))}});
+setTimeout(function(){unsub();},30000);
+}).catch(function(e){alert("❌ خطأ: "+e.message)});
 }
 
 function loadReminderLog(){
