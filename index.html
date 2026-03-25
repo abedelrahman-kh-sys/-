@@ -431,8 +431,8 @@ function rAPin(){document.getElementById("ap-pass").value="";document.getElement
 function chkAdmin(){var p=document.getElementById("ap-pass").value;if(p===VIEWER_PASS){isViewer=true;go("admin")}else if(C&&p===C.adminPin){isViewer=false;go("admin")}else{document.getElementById("ap-err").textContent="⚠️ كلمة المرور غير صحيحة";document.getElementById("ap-err").style.display="block";document.getElementById("ap-pass").value=""}}
 function aLoad(){setTimeout(chkAutoSend,3000);document.getElementById("a-sub").textContent=isViewer?VIEWER_NAME+" (مشاهدة فقط)":C.companyName;if(isViewer)aT="today";rATabs();document.getElementById("a-ct").innerHTML="⏳";rASum().then(function(){rACt()}).catch(function(e){console.error("err",e);var ct=document.getElementById("a-ct");if(ct)ct.innerHTML="<div style=\"color:#e74c3c;text-align:center;padding:30px\">خطأ - تحقق من Firebase</div>"})}
 function rASum(){var today=td();var aw=C.workers.filter(function(w){return w.active});var schProms=aw.map(function(w){return getShift(w.id,today).then(function(s){return{id:w.id,sch:s}})});return Promise.all([gToday(today),Promise.all(schProms)]).then(function(all){var recs=all[0];window._tr=recs;window._tsch={};all[1].forEach(function(x){if(x.sch)window._tsch[x.id]=x.sch});var p=0,a=0,ac=0;aw.forEach(function(w){var r=recs[w.id];if(r&&r.checkOut)p++;else if(r&&r.checkIn){p++;ac++}else a++});document.getElementById("a-sum").innerHTML=[{i:"👥",l:"إجمالي",v:aw.length,c:"#8ba3be"},{i:"✅",l:"حاضر",v:p,c:"#27c96e"},{i:"🔵",l:"في الموقع",v:ac,c:"#f0a030"},{i:"❌",l:"غائب",v:a,c:"#e74c3c"}].map(function(x){return"<div class='sc'><div style='font-size:1.1rem'>"+x.i+"</div><div style='font-size:1.4rem;font-weight:900;color:"+x.c+"'>"+x.v+"</div><div style='font-size:.6rem;color:#4e6d8a;font-weight:600'>"+x.l+"</div></div>"}).join("")})}
-function rATabs(){var ts=isViewer?[{id:"today",l:"📋 اليوم"}]:[{id:"today",l:"📋 اليوم"},{id:"monthly",l:"📅 شهري"},{id:"compliance",l:"📊 الالتزام"},{id:"leaves",l:"🏖️ إجازات"},{id:"manage",l:"⚙️ إدارة"},{id:"archive",l:"🗄️ أرشيف"}];document.getElementById("a-tabs").innerHTML=ts.map(function(t){return"<button class='tab"+(aT===t.id?" on":"")+"' onclick=\"aT='"+t.id+"';rATabs();rACt()\">"+t.l+"</button>"}).join("")}
-function rACt(){var c=document.getElementById("a-ct");c.innerHTML="⏳";if(isViewer){aT="today";rTdy(c);setTimeout(function(){c.querySelectorAll(".bs").forEach(function(b){b.remove()});var mc=c.querySelector(".mc");if(mc)mc.remove()},100);return}if(aT==="today")rTdy(c);else if(aT==="monthly")rMth(c);else if(aT==="compliance")rComp(c);else if(aT==="leaves")rLeaves(c);else if(aT==="manage")rMng(c);else if(aT==="archive")rArch(c)}
+function rATabs(){var ts=isViewer?[{id:"today",l:"📋 اليوم"}]:[{id:"today",l:"📋 اليوم"},{id:"monthly",l:"📅 شهري"},{id:"compliance",l:"📊 الالتزام"},{id:"leaves",l:"🏖️ إجازات"},{id:"manage",l:"⚙️ إدارة"},{id:"reminders",l:"📱 تذكيرات"},{id:"archive",l:"🗄️ أرشيف"}];document.getElementById("a-tabs").innerHTML=ts.map(function(t){return"<button class='tab"+(aT===t.id?" on":"")+"' onclick=\"aT='"+t.id+"';rATabs();rACt()\">"+t.l+"</button>"}).join("")}
+function rACt(){var c=document.getElementById("a-ct");c.innerHTML="⏳";if(isViewer){aT="today";rTdy(c);setTimeout(function(){c.querySelectorAll(".bs").forEach(function(b){b.remove()});var mc=c.querySelector(".mc");if(mc)mc.remove()},100);return}if(aT==="today")rTdy(c);else if(aT==="monthly")rMth(c);else if(aT==="compliance")rComp(c);else if(aT==="leaves")rLeaves(c);else if(aT==="manage")rMng(c);else if(aT==="reminders")rReminder(c);else if(aT==="archive")rArch(c)}
 
 // TODAY
 function locLink(loc,addr){if(addr&&loc)return"<a href='https://maps.google.com/?q="+loc.lat+","+loc.lng+"' target='_blank' style='color:#3498db;text-decoration:none;font-size:.68rem'>📍 "+es(addr)+"</a>";if(loc)return"<a href='https://maps.google.com/?q="+loc.lat+","+loc.lng+"' target='_blank' style='color:#3498db;font-size:.68rem'>📍</a>";return"—"}
@@ -615,10 +615,10 @@ function rmLeave(w,d){if(!confirm("حذف الإجازة؟"))return;dLeave(w,d).
 // === MANAGE TAB ===
 function rMng(c){
   var wR=C.workers.map(function(w){
-    return"<div class='mr' style='opacity:"+(w.active?1:.5)+"'><span style='flex:1;font-weight:600;font-size:.88rem;"+(w.active?"":"text-decoration:line-through")+"'>"+es(w.name)+"</span><span style='color:#4e6d8a;font-size:.68rem'>"+(w.shiftStart||"07:00")+"-"+(w.shiftEnd||"16:30")+(w.workFri?" 🟢ج":" 🔴ج")+(w.workSat?" 🟢س":" 🔴س")+"</span><span style='color:#d4a853;font-family:monospace;font-weight:800;font-size:.85rem;direction:ltr'>"+w.pin+"</span>"+(w.active?"<button class='bs' style='background:rgba(39,201,110,.12);color:#27c96e' onclick=\"sWA('"+w.id+"')\">📱</button><button class='bs' style='background:rgba(52,152,219,.12);color:#3498db' onclick=\"pRpt('"+w.id+"')\">🖨️</button>":"")+"<button class='bs' style='background:rgba(212,168,83,.12);color:#d4a853' onclick=\"oEditW('"+w.id+"')\">✏️</button><button class='bs' style='background:rgba(231,76,60,.08);color:#e74c3c' onclick=\"oDataMgmt('"+w.id+"')\">🗑️</button><button class='bs' style='background:"+(w.active?"rgba(231,76,60,.12)":"rgba(39,201,110,.12)")+";color:"+(w.active?"#e74c3c":"#27c96e")+"' onclick=\"tW('"+w.id+"')\">"+(w.active?"تعطيل":"تفعيل")+"</button></div>"
+    return"<div class='mr' style='opacity:"+(w.active?1:.5)+"'><span style='flex:1;font-weight:600;font-size:.88rem;"+(w.active?"":"text-decoration:line-through")+"'>"+es(w.name)+"</span><span style='color:#4e6d8a;font-size:.68rem'>"+(w.shiftStart||"07:00")+"-"+(w.shiftEnd||"16:30")+(w.workFri?" 🟢ج":" 🔴ج")+(w.workSat?" 🟢س":" 🔴س")+(w.phone?" 📱":"")+"</span><span style='color:#d4a853;font-family:monospace;font-weight:800;font-size:.85rem;direction:ltr'>"+w.pin+"</span>"+(w.active?"<button class='bs' style='background:rgba(39,201,110,.12);color:#27c96e' onclick=\"sWA('"+w.id+"')\">📱</button><button class='bs' style='background:rgba(52,152,219,.12);color:#3498db' onclick=\"pRpt('"+w.id+"')\">🖨️</button>":"")+"<button class='bs' style='background:rgba(212,168,83,.12);color:#d4a853' onclick=\"oEditW('"+w.id+"')\">✏️</button><button class='bs' style='background:rgba(231,76,60,.08);color:#e74c3c' onclick=\"oDataMgmt('"+w.id+"')\">🗑️</button><button class='bs' style='background:"+(w.active?"rgba(231,76,60,.12)":"rgba(39,201,110,.12)")+";color:"+(w.active?"#e74c3c":"#27c96e")+"' onclick=\"tW('"+w.id+"')\">"+(w.active?"تعطيل":"تفعيل")+"</button></div>"
   }).join("");
   var pT=C.projects.map(function(p){return"<div style='display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:rgba(15,25,42,.6);border-radius:10px;opacity:"+(p.active?1:.5)+"'><span style='font-weight:600;font-size:.82rem'>"+es(p.name)+"</span><button class='bs' style='background:"+(p.active?"rgba(231,76,60,.12)":"rgba(39,201,110,.12)")+";color:"+(p.active?"#e74c3c":"#27c96e")+"' onclick=\"tP('"+p.id+"')\">"+(p.active?"✕":"✓")+"</button></div>"}).join(" ");
-  c.innerHTML="<div class='mc'><h3>👷 إدارة العمال</h3>"+wR+"<div style='display:flex;gap:8px;margin-top:16px'><input class='mi' id='nwn' placeholder='اسم العامل' style='flex:1'><input class='mi' id='nwp' placeholder='PIN' maxlength='4' style='width:70px;direction:ltr;text-align:center'><input class='mi' id='nws' placeholder='بداية' value='07:00' style='width:70px;direction:ltr;text-align:center'><input class='mi' id='nwe' placeholder='نهاية' value='16:30' style='width:70px;direction:ltr;text-align:center'><button style='padding:10px 16px;background:linear-gradient(135deg,#27c96e,#20a85a);border-radius:10px;color:#fff;font-weight:700;white-space:nowrap;border:none;cursor:pointer' onclick='addW()'>+</button></div><button style='width:100%;margin-top:12px;padding:12px;background:rgba(39,201,110,.15);border:1px solid rgba(39,201,110,.3);border-radius:10px;color:#27c96e;font-weight:700;font-size:.85rem;cursor:pointer' onclick='sAllWA()'>📱 إرسال كل الروابط عبر واتساب</button></div><div class='mc'><h3>🏗️ المشاريع</h3><div style='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px'>"+pT+"</div><div style='display:flex;gap:8px'><input class='mi' id='npn' placeholder='مشروع جديد' style='flex:1'><button style='padding:10px 16px;background:linear-gradient(135deg,#27c96e,#20a85a);border-radius:10px;color:#fff;font-weight:700;border:none;cursor:pointer' onclick='addP()'>+</button></div></div><div class='mc'><h3>📸 إعدادات التصوير</h3><div style='display:flex;align-items:center;gap:10px;padding:10px;background:rgba(15,25,42,.6);border-radius:10px;margin-bottom:8px'><input type='checkbox' id='cfg-photo' "+(C.requirePhoto?"checked":"")+" onchange='tgPhoto()'><label for='cfg-photo' style='font-size:.85rem;color:#d4a853;font-weight:700;cursor:pointer'>📸 طلب صورة سيلفي إجبارية عند التسجيل</label></div><p style='font-size:.72rem;color:#4e6d8a'>عند التفعيل، العامل لازم يلتقط صورة سيلفي عشان يسجّل وصوله ومغادرته</p></div><div class='mc'><h3>🔐 كلمة مرور المدير: <span style='color:#d4a853;font-family:monospace'>"+C.adminPin+"</span></h3><button class='bs' style='background:rgba(212,168,83,.12);color:#d4a853;padding:6px 14px' onclick='oEAdmin()'>✏️ تغيير</button></div><div class='mc'><h3>🧪 بيانات تجريبية</h3><button style='padding:10px 20px;background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.3);border-radius:10px;color:#d4a853;font-weight:700;cursor:pointer' onclick='gDemo()'>🧪 إنشاء</button></div>"
+  c.innerHTML="<div class='mc'><h3>👷 إدارة العمال</h3>"+wR+"<div style='display:flex;gap:8px;margin-top:16px'><input class='mi' id='nwn' placeholder='اسم العامل' style='flex:1'><input class='mi' id='nwp' placeholder='PIN' maxlength='4' style='width:70px;direction:ltr;text-align:center'><input class='mi' id='nwph' placeholder='هاتف' style='width:100px;direction:ltr;text-align:center' type='tel'><input class='mi' id='nws' placeholder='بداية' value='07:00' style='width:70px;direction:ltr;text-align:center'><input class='mi' id='nwe' placeholder='نهاية' value='16:30' style='width:70px;direction:ltr;text-align:center'><button style='padding:10px 16px;background:linear-gradient(135deg,#27c96e,#20a85a);border-radius:10px;color:#fff;font-weight:700;white-space:nowrap;border:none;cursor:pointer' onclick='addW()'>+</button></div><button style='width:100%;margin-top:12px;padding:12px;background:rgba(39,201,110,.15);border:1px solid rgba(39,201,110,.3);border-radius:10px;color:#27c96e;font-weight:700;font-size:.85rem;cursor:pointer' onclick='sAllWA()'>📱 إرسال كل الروابط عبر واتساب</button></div><div class='mc'><h3>🏗️ المشاريع</h3><div style='display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px'>"+pT+"</div><div style='display:flex;gap:8px'><input class='mi' id='npn' placeholder='مشروع جديد' style='flex:1'><button style='padding:10px 16px;background:linear-gradient(135deg,#27c96e,#20a85a);border-radius:10px;color:#fff;font-weight:700;border:none;cursor:pointer' onclick='addP()'>+</button></div></div><div class='mc'><h3>📸 إعدادات التصوير</h3><div style='display:flex;align-items:center;gap:10px;padding:10px;background:rgba(15,25,42,.6);border-radius:10px;margin-bottom:8px'><input type='checkbox' id='cfg-photo' "+(C.requirePhoto?"checked":"")+" onchange='tgPhoto()'><label for='cfg-photo' style='font-size:.85rem;color:#d4a853;font-weight:700;cursor:pointer'>📸 طلب صورة سيلفي إجبارية عند التسجيل</label></div><p style='font-size:.72rem;color:#4e6d8a'>عند التفعيل، العامل لازم يلتقط صورة سيلفي عشان يسجّل وصوله ومغادرته</p></div><div class='mc'><h3>🔐 كلمة مرور المدير: <span style='color:#d4a853;font-family:monospace'>"+C.adminPin+"</span></h3><button class='bs' style='background:rgba(212,168,83,.12);color:#d4a853;padding:6px 14px' onclick='oEAdmin()'>✏️ تغيير</button></div><div class='mc'><h3>🧪 بيانات تجريبية</h3><button style='padding:10px 20px;background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.3);border-radius:10px;color:#d4a853;font-weight:700;cursor:pointer' onclick='gDemo()'>🧪 إنشاء</button></div>"
 }
 
 // ARCHIVE
@@ -662,7 +662,7 @@ function showArchPhoto(url){
   document.getElementById("mdl").style.display="flex";
 }
 
-function addW(){var n=document.getElementById("nwn").value.trim(),p=document.getElementById("nwp").value.trim(),ss=document.getElementById("nws").value.trim(),se=document.getElementById("nwe").value.trim();if(!n||!p||p.length!==4||!/^\d{4}$/.test(p))return alert("أدخل اسم و PIN (4 أرقام)");C.workers.push({id:gi(),name:n,pin:p,active:true,shiftStart:ss||"07:00",shiftEnd:se||"16:30",workFri:true,workSat:false});sCfg().then(function(){rACt()})}
+function addW(){var n=document.getElementById("nwn").value.trim(),p=document.getElementById("nwp").value.trim(),ss=document.getElementById("nws").value.trim(),se=document.getElementById("nwe").value.trim(),ph=document.getElementById("nwph")?document.getElementById("nwph").value.trim():"";if(!n||!p||p.length!==4||!/^\d{4}$/.test(p))return alert("أدخل اسم و PIN (4 أرقام)");C.workers.push({id:gi(),name:n,pin:p,active:true,shiftStart:ss||"07:00",shiftEnd:se||"16:30",workFri:true,workSat:false,phone:ph});sCfg().then(function(){rACt()})}
 function tW(id){C.workers=C.workers.map(function(w){return w.id===id?Object.assign({},w,{active:!w.active}):w});sCfg().then(function(){rASum();rACt()})}
 function addP(){var n=document.getElementById("npn").value.trim();if(!n)return;C.projects.push({id:gi(),name:n,active:true});sCfg().then(function(){rACt()})}
 function tP(id){C.projects=C.projects.map(function(p){return p.id===id?Object.assign({},p,{active:!p.active}):p});sCfg().then(function(){rACt()})}
@@ -671,7 +671,7 @@ function dRec(w,d){if(!confirm("حذف؟"))return;dA(w,d).then(function(){rACt()
 // Edit worker modal (PIN + shift times)
 function oEditW(wid){
   var w=C.workers.find(function(x){return x.id===wid});if(!w)return;
-  document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>✏️ تعديل - "+es(w.name)+"</h3><div style='margin-bottom:12px'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>PIN</label><input class='mi' id='ew-pin' value='"+w.pin+"' maxlength='4' style='direction:ltr;text-align:center;font-size:1.1rem;font-weight:800;letter-spacing:8px' type='tel'></div><div style='display:flex;gap:10px;margin-bottom:12px'><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>بداية الدوام</label><input class='mi' id='ew-ss' type='time' value='"+(w.shiftStart||"07:00")+"' style='direction:ltr'></div><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>نهاية الدوام</label><input class='mi' id='ew-se' type='time' value='"+(w.shiftEnd||"16:30")+"' style='direction:ltr'></div></div><div style='margin-bottom:14px;display:flex;align-items:center;gap:10px;padding:10px;background:rgba(15,25,42,.6);border-radius:10px;flex-wrap:wrap'><input type='checkbox' id='ew-fri' "+(w.workFri?"checked":"")+"><label for='ew-fri' style='font-size:.82rem;color:#d4a853;font-weight:700;cursor:pointer'>يعمل الجمعة</label><span style='color:#1e3654'>|</span><input type='checkbox' id='ew-sat' "+(w.workSat?"checked":"")+"><label for='ew-sat' style='font-size:.82rem;color:#d4a853;font-weight:700;cursor:pointer'>يعمل السبت</label></div><button style='width:100%;padding:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);border:none;border-radius:10px;color:#0b1929;font-weight:700;cursor:pointer;font-size:1rem' onclick=\"svEditW('"+wid+"')\">💾 حفظ</button>";
+  document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>✏️ تعديل - "+es(w.name)+"</h3><div style='margin-bottom:12px'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>PIN</label><input class='mi' id='ew-pin' value='"+w.pin+"' maxlength='4' style='direction:ltr;text-align:center;font-size:1.1rem;font-weight:800;letter-spacing:8px' type='tel'></div><div style='margin-bottom:12px'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>📱 رقم الهاتف (واتساب)</label><input class='mi' id='ew-phone' value='"+(w.phone||"")+"' placeholder='0599xxxxxxx' style='direction:ltr;text-align:center;font-size:.95rem' type='tel'></div><div style='display:flex;gap:10px;margin-bottom:12px'><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>بداية الدوام</label><input class='mi' id='ew-ss' type='time' value='"+(w.shiftStart||"07:00")+"' style='direction:ltr'></div><div style='flex:1'><label style='font-size:.75rem;color:#4e6d8a;display:block;margin-bottom:4px'>نهاية الدوام</label><input class='mi' id='ew-se' type='time' value='"+(w.shiftEnd||"16:30")+"' style='direction:ltr'></div></div><div style='margin-bottom:14px;display:flex;align-items:center;gap:10px;padding:10px;background:rgba(15,25,42,.6);border-radius:10px;flex-wrap:wrap'><input type='checkbox' id='ew-fri' "+(w.workFri?"checked":"")+"><label for='ew-fri' style='font-size:.82rem;color:#d4a853;font-weight:700;cursor:pointer'>يعمل الجمعة</label><span style='color:#1e3654'>|</span><input type='checkbox' id='ew-sat' "+(w.workSat?"checked":"")+"><label for='ew-sat' style='font-size:.82rem;color:#d4a853;font-weight:700;cursor:pointer'>يعمل السبت</label></div><button style='width:100%;padding:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);border:none;border-radius:10px;color:#0b1929;font-weight:700;cursor:pointer;font-size:1rem' onclick=\"svEditW('"+wid+"')\">💾 حفظ</button>";
   document.getElementById("mdl").style.display="flex";
 }
 function svEditW(id){
@@ -712,7 +712,8 @@ function svEditW(id){
       });
     });
   }
-  C.workers=C.workers.map(function(w){return w.id===id?Object.assign({},w,{pin:p,shiftStart:ss,shiftEnd:se,workFri:fri,workSat:sat}):w});
+  var ph=document.getElementById("ew-phone")?document.getElementById("ew-phone").value.trim():"";
+  C.workers=C.workers.map(function(w){return w.id===id?Object.assign({},w,{pin:p,shiftStart:ss,shiftEnd:se,workFri:fri,workSat:sat,phone:ph}):w});
   sCfg().then(function(){cMdl();rACt()});
 }
 function oEAdmin(){document.getElementById("mdl-c").innerHTML="<h3 style='color:#d4a853;font-size:.95rem;font-weight:700;margin-bottom:16px'>🔐 كلمة مرور المدير</h3><input class='mi' id='eai' placeholder='كلمة مرور جديدة' style='direction:ltr;text-align:center;font-size:1rem;font-weight:700;margin-bottom:14px' type='text'><p style='font-size:.7rem;color:#4e6d8a;margin-bottom:14px'>استخدم أحرف وأرقام ورموز</p><button style='width:100%;padding:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);border:none;border-radius:10px;color:#0b1929;font-weight:700;cursor:pointer' onclick='svAPin()'>💾 حفظ</button>";document.getElementById("mdl").style.display="flex"}
@@ -1540,6 +1541,88 @@ function svEditTime(wid,date){
     }
     return sA(wid,date,r);
   }).then(function(){cMdl();rACt()});
+}
+
+// === WHATSAPP REMINDERS ===
+var waConfigRef=db.collection("config").doc("whatsapp");
+function loadWAConfig(){return waConfigRef.get().then(function(d){return d.exists?d.data():null}).catch(function(){return null})}
+function saveWAConfig(cfg){return waConfigRef.set(cfg)}
+
+function rReminder(c){
+c.innerHTML="⏳ جارٍ التحميل...";
+loadWAConfig().then(function(wa){
+wa=wa||{enabled:false,token:"",phoneNumberId:"",adminPhone:"",checkinDelay:15,checkoutDelay:15,siteUrl:"https://abedelrahman-kh-sys.github.io/-/"};
+var h="<div class='card' style='margin-bottom:20px'>";
+h+="<h3 style='color:#d4a853;margin-bottom:16px'>📱 إعدادات تذكيرات WhatsApp</h3>";
+h+="<div style='margin-bottom:16px;display:flex;align-items:center;gap:12px'><label style='font-size:.9rem;font-weight:700'>تفعيل التذكيرات:</label><input type='checkbox' id='wa-enabled' "+(wa.enabled?"checked":"")+" style='width:20px;height:20px;cursor:pointer'></div>";
+h+="<div style='margin-bottom:12px'><label style='font-size:.82rem;color:#8aa4bf;display:block;margin-bottom:4px'>Access Token</label><input type='password' id='wa-token' value='"+es(wa.token||"")+"' style='width:100%;padding:10px;border-radius:10px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem' placeholder='أدخل Access Token من Meta'></div>";
+h+="<div style='margin-bottom:12px'><label style='font-size:.82rem;color:#8aa4bf;display:block;margin-bottom:4px'>Phone Number ID</label><input type='text' id='wa-phoneid' value='"+es(wa.phoneNumberId||"")+"' style='width:100%;padding:10px;border-radius:10px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem;direction:ltr' placeholder='رقم معرف الهاتف من Meta'></div>";
+h+="<div style='margin-bottom:12px'><label style='font-size:.82rem;color:#8aa4bf;display:block;margin-bottom:4px'>رقم هاتف المدير (للتقرير اليومي)</label><input type='tel' id='wa-admin' value='"+es(wa.adminPhone||"")+"' style='width:100%;padding:10px;border-radius:10px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem;direction:ltr' placeholder='مثال: 0599123456'></div>";
+h+="<div style='display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap'>";
+h+="<div style='flex:1;min-width:140px'><label style='font-size:.82rem;color:#8aa4bf;display:block;margin-bottom:4px'>تذكير الحضور بعد (دقيقة)</label><input type='number' id='wa-ci-delay' value='"+(wa.checkinDelay||15)+"' min='5' max='60' style='width:100%;padding:10px;border-radius:10px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem;direction:ltr'></div>";
+h+="<div style='flex:1;min-width:140px'><label style='font-size:.82rem;color:#8aa4bf;display:block;margin-bottom:4px'>تذكير الانصراف قبل (دقيقة)</label><input type='number' id='wa-co-delay' value='"+(wa.checkoutDelay||15)+"' min='5' max='60' style='width:100%;padding:10px;border-radius:10px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem;direction:ltr'></div></div>";
+h+="<button onclick='saveWASettings()' style='width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);color:#0b1929;font-weight:700;font-size:.95rem;margin-top:8px;border:none;cursor:pointer'>💾 حفظ الإعدادات</button>";
+h+="<button onclick='testWA()' style='width:100%;padding:12px;border-radius:12px;background:rgba(39,201,110,.15);color:#27c96e;border:1px solid #27c96e;font-weight:600;font-size:.9rem;margin-top:8px;cursor:pointer'>🧪 إرسال رسالة تجريبية للمدير</button>";
+h+="</div>";
+// أرقام العمال
+h+="<div class='card' style='margin-bottom:20px'>";
+h+="<h3 style='color:#d4a853;margin-bottom:12px'>📋 أرقام هواتف العمال</h3>";
+h+="<p style='font-size:.78rem;color:#8aa4bf;margin-bottom:12px'>أضف رقم الهاتف لكل عامل لتفعيل التذكيرات. الرقم يجب أن يكون مسجلاً على WhatsApp.</p>";
+var aw=C.workers.filter(function(w){return w.active});
+aw.forEach(function(w){
+h+="<div style='display:flex;align-items:center;gap:10px;margin-bottom:8px;padding:10px;background:rgba(15,25,42,.5);border-radius:10px'>";
+h+="<div style='width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#d4a853,#ebd08a);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:900;color:#0b1929;flex-shrink:0'>"+es(w.name[0])+"</div>";
+h+="<span style='min-width:90px;font-size:.83rem;font-weight:600'>"+es(w.name)+"</span>";
+h+="<input type='tel' id='wp-"+w.id+"' value='"+es(w.phone||"")+"' placeholder='0599xxxxxxx' style='flex:1;padding:8px 10px;border-radius:8px;border:1px solid #1e3654;background:rgba(15,25,42,.8);color:#e8edf2;font-size:.85rem;min-width:0;direction:ltr'>";
+h+="<span id='wps-"+w.id+"' style='font-size:1.1rem'>"+(w.phone?"✅":"⚠️")+"</span>";
+h+="</div>";
+});
+h+="<button onclick='saveWorkerPhones()' style='width:100%;padding:12px;border-radius:12px;background:linear-gradient(135deg,#d4a853,#ebd08a);color:#0b1929;font-weight:700;font-size:.95rem;margin-top:10px;border:none;cursor:pointer'>💾 حفظ أرقام الهواتف</button>";
+h+="</div>";
+// سجل التذكيرات
+h+="<div class='card'><h3 style='color:#d4a853;margin-bottom:12px'>📜 سجل التذكيرات المرسلة</h3><div id='reminder-log'>⏳</div></div>";
+c.innerHTML=h;
+loadReminderLog();
+});
+}
+
+function saveWASettings(){
+var cfg={enabled:document.getElementById("wa-enabled").checked,token:document.getElementById("wa-token").value.trim(),phoneNumberId:document.getElementById("wa-phoneid").value.trim(),adminPhone:document.getElementById("wa-admin").value.trim(),checkinDelay:parseInt(document.getElementById("wa-ci-delay").value)||15,checkoutDelay:parseInt(document.getElementById("wa-co-delay").value)||15,siteUrl:"https://abedelrahman-kh-sys.github.io/-/"};
+if(cfg.enabled&&(!cfg.token||!cfg.phoneNumberId)){alert("⚠️ يجب إدخال Access Token و Phone Number ID لتفعيل التذكيرات");return}
+saveWAConfig(cfg).then(function(){toast("✅ تم حفظ إعدادات WhatsApp")});
+}
+
+function saveWorkerPhones(){
+var changed=0;
+C.workers.forEach(function(w){var inp=document.getElementById("wp-"+w.id);if(inp){var val=inp.value.trim();if(val!==(w.phone||"")){w.phone=val;changed++;var st=document.getElementById("wps-"+w.id);if(st)st.textContent=val?"✅":"⚠️"}}});
+if(changed>0){sCfg().then(function(){toast("✅ تم حفظ "+changed+" رقم هاتف")})}else{toast("لم يتغير شيء")}
+}
+
+function testWA(){
+var adminPhone=document.getElementById("wa-admin").value.trim();
+if(!adminPhone){alert("⚠️ أدخل رقم هاتف المدير أولاً");return}
+loadWAConfig().then(function(wa){
+if(!wa||!wa.token||!wa.phoneNumberId){alert("⚠️ احفظ إعدادات WhatsApp أولاً");return}
+toast("📤 جارٍ الإرسال...");
+fetch("https://us-central1-mashour-attendance.cloudfunctions.net/testWhatsApp",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:adminPhone,message:"🔔 رسالة تجريبية\nنظام تذكيرات الحضور يعمل بنجاح ✅\n\nمشهور للبناء والهندسة"})}).then(function(r){return r.json()}).then(function(d){if(d.success){toast("✅ تم إرسال الرسالة التجريبية بنجاح!")}else{alert("❌ فشل الإرسال: "+JSON.stringify(d.error))}}).catch(function(e){alert("❌ خطأ: "+e.message)});
+});
+}
+
+function loadReminderLog(){
+db.collection("reminderLogs").orderBy("timestamp","desc").limit(20).get().then(function(snap){
+var el=document.getElementById("reminder-log");
+if(!el)return;
+if(snap.empty){el.innerHTML="<p style='color:#4e6d8a;font-size:.85rem'>لا توجد تذكيرات مرسلة بعد</p>";return}
+var h="";
+snap.forEach(function(d){var l=d.data();var typeIcon=l.type==="checkin"?"⬅️ حضور":l.type==="checkout"?"➡️ انصراف":"📊 تقرير";var ts=l.timestamp?l.timestamp.toDate().toLocaleString("ar"):"";
+h+="<div style='padding:8px 10px;margin-bottom:6px;background:rgba(15,25,42,.4);border-radius:8px;font-size:.8rem'>";
+h+="<div style='display:flex;justify-content:space-between;margin-bottom:4px'><span>"+typeIcon+"</span><span style='color:#4e6d8a'>"+ts+"</span></div>";
+h+="<span style='color:#27c96e'>✅ "+(l.totalSent||0)+"</span> <span style='color:#e74c3c'>❌ "+(l.totalFailed||0)+"</span>";
+if(l.results&&l.results.length>0){l.results.forEach(function(r){h+="<div style='margin-top:2px;color:#8aa4bf;font-size:.75rem'>  "+(r.success?"✅":"❌")+" "+es(r.workerName||r.phone)+"</div>"})}
+h+="</div>";
+});
+el.innerHTML=h;
+});
 }
 
 // === INIT ===
