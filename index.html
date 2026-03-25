@@ -6,6 +6,7 @@
 <title>نظام الحضور - مشهور للبناء</title>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-functions-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -1607,8 +1608,8 @@ var token=document.getElementById("wa-token").value.trim();
 var phoneId=document.getElementById("wa-phoneid").value.trim();
 if(!token||!phoneId){alert("⚠️ أدخل Access Token و Phone Number ID أولاً");return}
 toast("📤 جارٍ الإرسال...");
-var phone=fmtPhone(adminPhone);
-fetch("https://graph.facebook.com/v21.0/"+phoneId+"/messages",{method:"POST",headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},body:JSON.stringify({messaging_product:"whatsapp",to:phone,type:"text",text:{body:"🔔 رسالة تجريبية\nنظام تذكيرات الحضور يعمل بنجاح ✅\n\nمشهور للبناء والهندسة"}})}).then(function(r){return r.json()}).then(function(d){if(d.messages){toast("✅ تم إرسال الرسالة التجريبية بنجاح!")}else{alert("❌ فشل الإرسال:\n"+JSON.stringify(d.error||d,null,2))}}).catch(function(e){alert("❌ خطأ: "+e.message)});
+var testFn=firebase.functions().httpsCallable("testWhatsApp");
+testFn({phone:adminPhone,message:"🔔 رسالة تجريبية\nنظام تذكيرات الحضور يعمل بنجاح ✅\n\nمشهور للبناء والهندسة"}).then(function(r){if(r.data&&r.data.success){toast("✅ تم إرسال الرسالة التجريبية بنجاح!")}else{alert("❌ فشل الإرسال:\n"+JSON.stringify(r.data))}}).catch(function(e){alert("❌ خطأ: "+e.message)});
 }
 
 function loadReminderLog(){
